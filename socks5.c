@@ -44,9 +44,6 @@ socks5_read_auth (struct tcpConnection *client) {
 
 int
 socks5_write_auth (struct tcpConnection *client, char method) {
-  //int one = 1;
-  //setsockopt(client->fd, SOL_TCP, TCP_NODELAY, &one, sizeof(one));
-
   char buf[2] = {5};
   buf[1] = method;
   return tcp_write(client, buf, 2);
@@ -54,49 +51,59 @@ socks5_write_auth (struct tcpConnection *client, char method) {
 
 struct socks5_request *
 socks5_read_request(struct tcpConnection *client) {
-  char *buf = (char *) malloc(255);
-  int length;
-  do {
-    length = tcp_read(client, buf, 255);
-  } while (length == 0);
-
-  if (length > 0) {
-    int i;
-    for (i = 0; i < 255; i++)
-      printf("%c", buf[i]);
-    printf("\n");
-  } else {
-    perror("no response");
-  }
-
-  /* TODO: realloc */
+  char *buf = (char *) malloc(265);
+  int length = tcp_read(client, buf, 265);
   struct socks5_request *request = (struct socks5_request *) buf;
-  
+
   if (request->address_type == ATYP_DOMAIN) {
-    request->bind_address.domain = &(request->bind_address);
+    int name_size = request->bind_address.domain.length;
+    request->bind_port.bytes[0] = request->bind_address.domain.name[name_size];
+    request->bind_port.bytes[1] = request->bind_address.domain.name[name_size + 1];
+    request->bind_port.number = ntohs(request->bind_port.number);
+    request->bind_address.domain.name[name_size] = '\0';
   }
 
   return request;
 };
 
+/* debug functions */
 
-/*
-int 
-main (int argc, char **argv) {
-  struct auth {
-    char ver;
-    char n;
-    char methods[];
-  };
-  char buf[] = {05, 03, 97, 13, 42};
-  struct auth *a = (struct auth *) buf;
-
-  printf("ver: %d\n", a->ver);
+void
+socks5_auth_print (struct socks5_auth *auth_request) {
+  printf("ver: %d\n", auth_request->version);
   printf("auth methods: \n");
   int i;
-  for (i = 0; i < a->n; i++) 
-    printf(" - %d\n", a->methods[i]);
-
-  return 0;
+  for (i = 0; i < auth_request->nmethods; i++) 
+    printf(" - %s\n", socks5_auth_method_desc[auth_request->methods[i]]);
 }
-*/
+
+void
+socks5_request_print (struct socks5_request *request) {
+  printf("version: %d\n", request->version);
+  printf("command: %s\n", socks5_command_desc[request->command]);
+  printf("address_type: %s\n", socks5_addr_type_desc[request->address_type]);
+  printf("bind_address: ");
+  switch (request->address_type) {
+  case ATYP_IPV4:
+    printf("%d.%d.%d.%d\n", 
+	   request->bind_address.ipv4[0],
+	   request->bind_address.ipv4[1],
+	   request->bind_address.ipv4[2],
+	   request->bind_address.ipv4[3]);
+    break;
+  case ATYP_IPV6:
+    {
+      int i;
+      for (i = 0; i < 15; i++)
+	printf("%d:", request->bind_address.ipv6[i]);
+    }
+    printf("%d\n", request->bind_address.ipv6[15]);
+    break;
+  case ATYP_DOMAIN:
+    printf("%s\n", request->bind_address.domain.name);
+    break;
+  default:
+    perror("unknown address type");
+  }
+  printf("bind_port: %d\n", request->bind_port.number);
+}

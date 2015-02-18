@@ -46,10 +46,17 @@ struct socks5_request {
   char reserved;
   char address_type;
   union {
-    char ipv4[4];
-    char ipv6[16];
-    char *domain;
+    unsigned char ipv4[4];
+    unsigned char ipv6[16];
+    struct {
+      char length;
+      char name[255];
+    } domain;
   } bind_address;
+  union {
+    unsigned char bytes[2];
+    unsigned short number;
+  } bind_port;
 };
 
 struct socks5_auth *
