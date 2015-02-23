@@ -3,6 +3,9 @@
 #include <netdb.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 
 struct tcpConnection* tcp_connect(char* host, char* port) {
     int sockfd;

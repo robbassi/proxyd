@@ -66,13 +66,20 @@ socks5_read_request(struct tcpConnection *client) {
   return request;
 };
 
+int
+socks5_write_request(struct tcpConnection *client, enum socks5_response_code code) {
+  char buf[10] = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
+  buf[1] = code;
+  return tcp_write(client, buf, 10);
+}
+
 /* debug functions */
 
 void
 socks5_auth_print (struct socks5_auth *auth_request) {
+  int i;
   printf("ver: %d\n", auth_request->version);
   printf("auth methods: \n");
-  int i;
   for (i = 0; i < auth_request->nmethods; i++) 
     printf(" - %s\n", socks5_auth_method_desc[auth_request->methods[i]]);
 }
@@ -83,6 +90,8 @@ socks5_request_print (struct socks5_request *request) {
   printf("command: %s\n", socks5_command_desc[request->command]);
   printf("address_type: %s\n", socks5_addr_type_desc[request->address_type]);
   printf("bind_address: ");
+
+  /* print address in appropriate format */
   switch (request->address_type) {
   case ATYP_IPV4:
     printf("%d.%d.%d.%d\n", 
@@ -105,5 +114,6 @@ socks5_request_print (struct socks5_request *request) {
   default:
     perror("unknown address type");
   }
+
   printf("bind_port: %d\n", request->bind_port.number);
 }
