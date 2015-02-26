@@ -1,6 +1,3 @@
-clean:
-	rm -f *.o *~
-
 all: libtcp server
 
 server: libtcp socks5 proxy
@@ -14,3 +11,5 @@ proxy:
 
 libtcp:
 	gcc -c -o tcp.o tcp.c
+clean:
+	rm -f *.o *~
