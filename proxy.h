@@ -9,6 +9,6 @@ struct proxy {
 };
 
 bool
-proxy_connect(struct tcpConnection *source, struct tcpConnection *destination);
+proxy_connect(int, int);
 
 #endif /* __PROXY_H__ */

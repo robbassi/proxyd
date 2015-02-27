@@ -15,13 +15,20 @@ struct tcpConnection* tcp_connect(char* host, char* port) {
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    getaddrinfo(host, port, &hints, &res);
-    sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    connect(sockfd, res->ai_addr, res->ai_addrlen);
+    int lookup_res = getaddrinfo(host, port, &hints, &res);
+    
+    if (lookup_res == 0) {
+      sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+      connect(sockfd, res->ai_addr, res->ai_addrlen);
 
-    struct tcpConnection* conn = (struct tcpConnection*) malloc(sizeof(struct tcpConnection));
-    conn->fd = sockfd;
-    return conn;
+      struct tcpConnection* conn = (struct tcpConnection*) malloc(sizeof(struct tcpConnection));
+      conn->fd = sockfd;
+      return conn;
+    } else {
+      perror("COULD NOT RESOLVE HOST");
+    }
+
+    return NULL;
 }
 
 struct tcpConnection* tcp_listen(char* host, char* port) {

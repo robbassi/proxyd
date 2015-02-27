@@ -36,9 +36,16 @@ char *socks5_response_code_desc[9] = {
 
 struct socks5_auth *
 socks5_read_auth (struct tcpConnection *client) {
+  struct socks5_auth *auth_pack = NULL;
   char *buf = (char *) malloc(SOCKS5_AUTH_MIN_PACKET_SIZE);
   int length = tcp_read(client, buf, SOCKS5_AUTH_MIN_PACKET_SIZE);
-  struct socks5_auth *auth_pack = (struct socks5_auth *) buf;
+  
+  if (length > 0) {
+    auth_pack = (struct socks5_auth *) buf;
+  } else {
+    free(buf);
+  }
+
   return auth_pack;
 }
 
@@ -51,8 +58,8 @@ socks5_write_auth (struct tcpConnection *client, char method) {
 
 struct socks5_request *
 socks5_read_request(struct tcpConnection *client) {
-  char *buf = (char *) malloc(265);
-  int length = tcp_read(client, buf, 265);
+  char *buf = (char *) malloc(1000);
+  int length = tcp_read(client, buf, 1000);
   struct socks5_request *request = (struct socks5_request *) buf;
 
   if (request->address_type == ATYP_DOMAIN) {
