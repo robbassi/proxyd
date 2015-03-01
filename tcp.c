@@ -24,9 +24,10 @@ struct tcpConnection* tcp_connect(char* host, char* port) {
 
       conn = (struct tcpConnection*) malloc(sizeof(struct tcpConnection));
       conn->fd = sockfd;
+      
+      freeaddrinfo(res);
     }
 
-    freeaddrinfo(res);
     return conn;
 }
 
@@ -48,9 +49,10 @@ struct tcpConnection* tcp_listen(char* host, char* port) {
 
       conn = (struct tcpConnection*) malloc(sizeof(struct tcpConnection));
       conn->fd = sockfd;
+
+      freeaddrinfo(res);
     }
 
-    freeaddrinfo(res);
     return conn;
 }
 
