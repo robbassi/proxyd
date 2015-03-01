@@ -59,15 +59,19 @@ socks5_write_auth (struct tcpConnection *client, char method) {
 struct socks5_request *
 socks5_read_request(struct tcpConnection *client) {
   char *buf = (char *) malloc(1000);
+  struct socks5_request *request = NULL;
   int length = tcp_read(client, buf, 1000);
-  struct socks5_request *request = (struct socks5_request *) buf;
 
-  if (request->address_type == ATYP_DOMAIN) {
-    int name_size = request->bind_address.domain.length;
-    request->bind_port.bytes[0] = request->bind_address.domain.name[name_size];
-    request->bind_port.bytes[1] = request->bind_address.domain.name[name_size + 1];
-    request->bind_port.number = ntohs(request->bind_port.number);
-    request->bind_address.domain.name[name_size] = '\0';
+  if (length > 0) {
+    request = (struct socks5_request *) buf;
+
+    if (request->address_type == ATYP_DOMAIN) {
+      int name_size = request->bind_address.domain.length;
+      request->bind_port.bytes[0] = request->bind_address.domain.name[name_size];
+      request->bind_port.bytes[1] = request->bind_address.domain.name[name_size + 1];
+      request->bind_port.number = ntohs(request->bind_port.number);
+      request->bind_address.domain.name[name_size] = '\0';
+    }
   }
 
   return request;

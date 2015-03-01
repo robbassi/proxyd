@@ -75,25 +75,28 @@ handle_request(void *data) {
   
   if (auth_success) {
     struct socks5_request *request = socks5_read_request(client);
-    socks5_request_print(request);
+  
+    if (request != NULL) {
+      socks5_request_print(request);
     
-    bool status;
-    switch (request->command) {
-    case CMD_CONNECT:
-      status = handle_connect(client, request);
-      if (!status) {
-	    perror("connect failed");
+      bool status;
+      switch (request->command) {
+      case CMD_CONNECT:
+	status = handle_connect(client, request);
+	if (!status) {
+	  perror("connect failed");
+	}
+	break;
+      case CMD_BIND:
+	perror("bind not supported");
+	break;
+      case CMD_UDP_ASSOC:
+	perror("udp assoc. not supported");
+	break;
       }
-      break;
-    case CMD_BIND:
-      perror("bind not supported");
-      break;
-    case CMD_UDP_ASSOC:
-      perror("udp assoc. not supported");
-      break;
-    }
 
-    free(request);
+      free(request);
+    }
   } else {
     // socks5_write_auth(client, AUTH_NOT_ACCEPTABLE);
     perror("auth failed");
