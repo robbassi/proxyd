@@ -72,6 +72,8 @@ socks5_read_request(struct tcpConnection *client) {
       request->bind_port.number = ntohs(request->bind_port.number);
       request->bind_address.domain.name[name_size] = '\0';
     }
+  } else {
+    free(buf);
   }
 
   return request;
