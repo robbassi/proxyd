@@ -89,7 +89,7 @@ struct socks5_request *socks5_read_request (struct tcpConnection *client)
 };
 
 int socks5_write_request (struct tcpConnection *client,
-		      enum socks5_response_code code)
+			  enum socks5_response_code code)
 {
   char buf[10] = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
   buf[1] = code;

@@ -8,7 +8,7 @@
 #include "proxy.h"
 
 bool handle_connect (struct tcpConnection * client,
-		struct socks5_request * request)
+		     struct socks5_request * request)
 {
   bool success = false;
   struct tcpConnection *destination = NULL;

@@ -72,5 +72,5 @@ struct socks5_auth *socks5_read_auth (struct tcpConnection *client);
 int socks5_write_auth (struct tcpConnection *client, char method);
 struct socks5_request *socks5_read_request (struct tcpConnection *client);
 int socks5_write_request (struct tcpConnection *client,
-		      enum socks5_response_code code);
+			  enum socks5_response_code code);
 #endif /* __SOCKS5_H__ */
