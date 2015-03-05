@@ -3,12 +3,12 @@
 
 #include <stdbool.h>
 
-struct proxy {
+struct proxy
+{
   struct tcpConnection *source;
   struct tcpCOnnection *destination;
 };
 
-bool
-proxy_connect(int, int);
+bool proxy_connect (int, int);
 
 #endif /* __PROXY_H__ */

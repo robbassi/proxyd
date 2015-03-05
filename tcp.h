@@ -6,17 +6,18 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-struct tcpConnection {
-    int fd;
-    int mutex;
+struct tcpConnection
+{
+  int fd;
+  int mutex;
 
 };
 
-struct tcpConnection* tcp_connect(char* host, char* port);
-struct tcpConnection* tcp_listen(char* host, char* port);
-struct tcpConnection* tcp_accept(struct tcpConnection*);
-int tcp_read(struct tcpConnection*, char* buf, int len);
-int tcp_write(struct tcpConnection*, char* buf, int len);
-void tcp_close(struct tcpConnection*);
+struct tcpConnection *tcp_connect (char *host, char *port);
+struct tcpConnection *tcp_listen (char *host, char *port);
+struct tcpConnection *tcp_accept (struct tcpConnection *);
+int tcp_read (struct tcpConnection *, char *buf, int len);
+int tcp_write (struct tcpConnection *, char *buf, int len);
+void tcp_close (struct tcpConnection *);
 
-#endif /*LIBTCP_H*/
+#endif /*LIBTCP_H */

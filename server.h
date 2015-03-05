@@ -3,7 +3,8 @@
 
 #include <stdbool.h>
 
-struct socks5_session {
+struct socks5_session
+{
   bool authenticated;
   bool active;
   struct tcpConnection *client;
