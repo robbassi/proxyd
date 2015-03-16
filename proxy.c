@@ -1,25 +1,29 @@
 #define _GNU_SOURCE		/* required for POLLRDHUP event */
 #include <stdio.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include <poll.h>
 #include "tcp.h"
 
-#define BUFSIZE 2000
+#define BUFSIZE 200
 
 void __pump (int sourcefd, int destfd)
-{				//, struct tcpConnection *destination) {
+{				
   char buf[BUFSIZE];
   int len = read (sourcefd, buf, BUFSIZE);
   if (len > 0)
     {
-      write (destfd, buf, len);
+      int written = 0;
+      while (written < len) 
+	{
+	  written = write (destfd, buf + written, len - written);
+	}
+      
     }
-
-  printf ("pumped %d bytes\n", len);
 }
 
 bool proxy_connect (int sourcefd, int destfd)
-{				//struct tcpConnection *source, struct tcpConnection *destination) {
+{				
   struct pollfd fds[2];
 
   fds[0].fd = sourcefd;
@@ -56,6 +60,7 @@ bool proxy_connect (int sourcefd, int destfd)
 	      __pump (destfd, sourcefd);
 	    }
 	}
+      usleep(1000);
     }
 
   return true;
