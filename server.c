@@ -7,8 +7,8 @@
 #include "socks5.h"
 #include "proxy.h"
 
-bool handle_connect (struct tcpConnection * client,
-		     struct socks5_request * request)
+bool handle_connect (struct tcpConnection *client,
+		     struct socks5_request *request)
 {
   bool success = false;
   struct tcpConnection *destination = NULL;
@@ -46,8 +46,8 @@ bool handle_connect (struct tcpConnection * client,
   success = proxy_connect (client->fd, destination->fd);
 
 free_dest:
-  free (destination);
   tcp_close (destination);
+  free (destination);
 exit:;
   return success;
 }
