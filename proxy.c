@@ -16,7 +16,7 @@ void __pump (int sourcefd, int destfd)
       int written = 0;
       while (written < len) 
 	{
-	  written = write (destfd, buf + written, len - written);
+	  written += write (destfd, buf + written, len - written);
 	}
       
     }
