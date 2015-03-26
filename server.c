@@ -117,6 +117,7 @@ void *handle_request (void *data)
       perror ("auth failed");
     }
 
+  tcp_close(client);
   free (data);
   return NULL;
 }
