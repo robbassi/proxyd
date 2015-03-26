@@ -90,7 +90,7 @@ int tcp_read (struct tcpConnection *conn, char *buf, int len)
 
 int tcp_write (struct tcpConnection *conn, char *buf, int len)
 {
-  write (conn->fd, buf, len);
+  return write (conn->fd, buf, len);
 }
 
 void tcp_close (struct tcpConnection *conn)
