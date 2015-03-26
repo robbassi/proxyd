@@ -1,3 +1,4 @@
+
 #define _GNU_SOURCE		/* required for POLLRDHUP event */
 #include <stdio.h>
 #include <stdbool.h>
@@ -5,7 +6,9 @@
 #include <poll.h>
 #include "tcp.h"
 
-#define BUFSIZE 200
+/* 2.5MB/s */
+#define BUFSIZE 256
+#define DELAYMS 100
 
 void __pump (int sourcefd, int destfd)
 {				
@@ -60,7 +63,7 @@ bool proxy_connect (int sourcefd, int destfd)
 	      __pump (destfd, sourcefd);
 	    }
 	}
-      usleep(1000);
+      usleep(DELAYMS);
     }
 
   return true;
