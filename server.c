@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
+#include <signal.h>
 
 #include "tcp.h"
 #include "server.h"
@@ -136,13 +136,21 @@ void start ()
   while (1)
     {
       struct tcpConnection *client = tcp_accept (sock);
-      pthread_t client_thread;
-      pthread_create (&client_thread, NULL, handle_request, (void *) client);
+
+      if (fork() == 0)
+        {
+          tcp_close (sock);
+          handle_request ((void *) client);
+          exit (0);
+        }
+
+      tcp_close (client);
     }
 }
 
 int main (int argc, char **argv)
 {
+  signal (SIGCHLD, SIG_IGN);
   start ();
   return 0;
 }
