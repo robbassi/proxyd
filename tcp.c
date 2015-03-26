@@ -1,4 +1,3 @@
-#include "tcp.h"
 #include <stdio.h>
 #include <netdb.h>
 #include <string.h>
@@ -6,6 +5,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <fcntl.h>
+#include <stdbool.h>
+
+#include "tcp.h"
 
 struct tcpConnection *tcp_connect (char *host, char *port)
 {
@@ -35,7 +38,7 @@ struct tcpConnection *tcp_connect (char *host, char *port)
 
 struct tcpConnection *tcp_listen (char *host, char *port)
 {
-  int sockfd;
+  int sockfd, reuseaddr = true;
   struct addrinfo hints, *res;
   struct tcpConnection *conn = NULL;
 
@@ -48,8 +51,17 @@ struct tcpConnection *tcp_listen (char *host, char *port)
   if (lookup_res == 0)
     {
       sockfd = socket (res->ai_family, res->ai_socktype, res->ai_protocol);
-      bind (sockfd, res->ai_addr, res->ai_addrlen);
-      listen (sockfd, 10);
+      setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof reuseaddr);
+
+      if (bind (sockfd, res->ai_addr, res->ai_addrlen) == -1)
+	{
+	  goto fail;
+	}
+
+      if (listen (sockfd, 10))
+	{
+	  goto fail;
+	}
 
       conn = (struct tcpConnection *) malloc (sizeof (struct tcpConnection));
       conn->fd = sockfd;
@@ -58,6 +70,9 @@ struct tcpConnection *tcp_listen (char *host, char *port)
     }
 
   return conn;
+ fail:
+  close(sockfd);
+  return NULL;
 }
 
 struct tcpConnection *tcp_accept (struct tcpConnection *conn)
