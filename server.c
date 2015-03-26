@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+
 #include "tcp.h"
 #include "server.h"
 #include "socks5.h"
@@ -125,6 +126,13 @@ void *handle_request (void *data)
 void start ()
 {
   struct tcpConnection *sock = tcp_listen ("localhost", "1080");
+
+  if (sock == NULL)
+    {
+      perror ("failed to bind");
+      exit (1);
+    }
+
   while (1)
     {
       struct tcpConnection *client = tcp_accept (sock);
