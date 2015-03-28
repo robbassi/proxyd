@@ -58,7 +58,7 @@ struct tcpConnection *tcp_listen (char *host, char *port)
 	  goto fail;
 	}
 
-      if (listen (sockfd, 10))
+      if (listen (sockfd, 10) == -1)
 	{
 	  goto fail;
 	}
