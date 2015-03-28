@@ -56,11 +56,3 @@ void _log (enum log_level level, const char *time, const char *message)
 	 COLOR(KBLU, time),
 	 COLOR(KWHT, message));
 }
-
-/* int main (void) */
-/* { */
-/*   logger (INFO, "%s there %d", "hey", 42); */
-/*   logger (ERROR, "oh shit!"); */
-/*   logger (FATAL, "wtf !?!?!"); */
-/*   return 0; */
-/* } */
