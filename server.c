@@ -7,6 +7,7 @@
 #include "server.h"
 #include "socks5.h"
 #include "proxy.h"
+#include "logger.h"
 
 bool handle_connect (struct tcpConnection *client,
 		     struct socks5_request *request)
@@ -23,7 +24,7 @@ bool handle_connect (struct tcpConnection *client,
     case ATYP_IPV6:
       break;
     case ATYP_DOMAIN:
-      printf ("connecting to %s:%s\n", request->bind_address.domain.name,
+      logger (INFO, "connecting to %s:%s", request->bind_address.domain.name,
 	      portbuf);
       destination = tcp_connect (request->bind_address.domain.name, portbuf);
 
@@ -60,8 +61,6 @@ bool handle_auth (struct tcpConnection * client)
 
   if (auth_request != NULL)
     {
-      socks5_auth_print (auth_request);
-
       /* only support method 00 for now */
       if (auth_request->methods[0] == AUTH_NONE)
 	{
@@ -89,8 +88,6 @@ void *handle_request (void *data)
 
       if (request != NULL)
 	{
-	  socks5_request_print (request);
-
 	  bool status;
 	  switch (request->command)
 	    {
@@ -98,14 +95,14 @@ void *handle_request (void *data)
 	      status = handle_connect (client, request);
 	      if (!status)
 		{
-		  perror ("connect failed");
+		  logger (WARN, "connect failed");
 		}
 	      break;
 	    case CMD_BIND:
-	      perror ("bind not supported");
+	      logger (WARN, "bind not supported");
 	      break;
 	    case CMD_UDP_ASSOC:
-	      perror ("udp assoc. not supported");
+	      logger (WARN, "udp assoc. not supported");
 	      break;
 	    }
 
@@ -115,7 +112,7 @@ void *handle_request (void *data)
   else
     {
       // socks5_write_auth(client, AUTH_NOT_ACCEPTABLE);
-      perror ("auth failed");
+      logger (WARN, "auth failed");
     }
 
   tcp_close(client);
@@ -129,7 +126,7 @@ void start ()
 
   if (sock == NULL)
     {
-      perror ("failed to bind");
+      logger (WARN, "failed to bind");
       exit (1);
     }
 

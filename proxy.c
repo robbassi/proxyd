@@ -4,7 +4,10 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <poll.h>
+#include <errno.h>
+
 #include "tcp.h"
+#include "logger.h"
 
 /* 2.5MB/s */
 #define BUFSIZE 256
@@ -44,7 +47,7 @@ bool proxy_connect (int sourcefd, int destfd)
 
       if (res == -1)
 	{
-	  perror ("poll() error: ");
+	  logger (ERROR, "poll() error: %s", strerror(errno));
 	}
       else if (res)
 	{
