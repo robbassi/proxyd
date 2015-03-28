@@ -42,36 +42,62 @@ struct tcpConnection *tcp_listen (char *host, char *port)
   struct addrinfo hints, *res;
   struct tcpConnection *conn = NULL;
 
-  memset (&hints, 0, sizeof hints);
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_socktype = SOCK_STREAM;
-
-  int lookup_res = getaddrinfo (host, port, &hints, &res);
-
-  if (lookup_res == 0)
+  /* bind to INADDR_ANY */
+  if (host == NULL)
     {
-      sockfd = socket (res->ai_family, res->ai_socktype, res->ai_protocol);
+      struct sockaddr_in name;
+
+      sockfd = socket (PF_INET, SOCK_STREAM, 0);
+
+      name.sin_family = AF_INET;
+      name.sin_port = htons (atoi(port));
+      name.sin_addr.s_addr = htonl (INADDR_ANY);
+
       setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof reuseaddr);
 
-      if (bind (sockfd, res->ai_addr, res->ai_addrlen) == -1)
+      if (bind (sockfd, (struct sockaddr *) &name, sizeof (name)) == -1)
 	{
-	  goto fail;
+	  goto fail1;
 	}
+    }
+  /* bind to specific host */
+  else 
+    {
+      memset (&hints, 0, sizeof hints);
+      hints.ai_family = AF_UNSPEC;
+      hints.ai_socktype = SOCK_STREAM;
 
-      if (listen (sockfd, 10) == -1)
+      int lookup_res = getaddrinfo (host, port, &hints, &res);
+
+      if (lookup_res == 0)
 	{
-	  goto fail;
+	  sockfd = socket (res->ai_family, res->ai_socktype, res->ai_protocol);
+	  setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof reuseaddr);
+
+	  if (bind (sockfd, res->ai_addr, res->ai_addrlen) == -1)
+	    {
+	      goto fail1;
+	    }
+	  freeaddrinfo (res);
 	}
-
-      conn = (struct tcpConnection *) malloc (sizeof (struct tcpConnection));
-      conn->fd = sockfd;
-
-      freeaddrinfo (res);
+      else 
+	{
+	  goto fail2;
+	}
     }
 
+  if (listen (sockfd, 10) == -1)
+    {
+      goto fail1;
+    }
+
+  conn = (struct tcpConnection *) malloc (sizeof (struct tcpConnection));
+  conn->fd = sockfd;
+
   return conn;
- fail:
+ fail1:
   close(sockfd);
+ fail2:
   return NULL;
 }
 

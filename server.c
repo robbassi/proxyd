@@ -122,7 +122,7 @@ void *handle_request (void *data)
 
 void start ()
 {
-  struct tcpConnection *sock = tcp_listen ("localhost", "1080");
+  struct tcpConnection *sock = tcp_listen (NULL, "1080");
 
   if (sock == NULL)
     {
