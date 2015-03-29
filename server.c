@@ -12,20 +12,36 @@
 bool handle_connect (struct tcpConnection *client,
 		     struct socks5_request *request)
 {
+  int port;
+  socklen_t len;
   bool success = false;
-  struct tcpConnection *destination = NULL;
-  char portbuf[100];
-  snprintf (portbuf, 10, "%d", request->bind_port.number);
 
-  switch (request->address_type)
+  struct sockaddr_storage addr;
+  struct tcpConnection *destination = NULL;
+
+  char portbuf[100], ipstr[INET6_ADDRSTRLEN];
+  
+  snprintf (portbuf, 10, "%d", request->bind_port.number);
+  
+  len = sizeof addr;
+  getpeername (client->fd, (struct sockaddr*) &addr, &len);
+
+  if (addr.ss_family == AF_INET) 
     {
-    case ATYP_IPV4:
-      break;
-    case ATYP_IPV6:
-      break;
-    case ATYP_DOMAIN:
-      logger (INFO, "connecting to %s:%s", request->bind_address.domain.name,
-	      portbuf);
+      struct sockaddr_in *s = (struct sockaddr_in *) &addr;
+      port = ntohs (s->sin_port);
+      inet_ntop (AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
+    } 
+  else 
+    { // AF_INET6
+      struct sockaddr_in6 *s = (struct sockaddr_in6 *) &addr;
+      port = ntohs (s->sin6_port);
+      inet_ntop (AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
+    }
+
+  if (request->address_type == ATYP_DOMAIN)
+    {
+      logger (INFO, "%s:%d <=> %s:%s", ipstr, port, request->bind_address.domain.name, portbuf);
       destination = tcp_connect (request->bind_address.domain.name, portbuf);
 
       // could not connect to host
@@ -34,7 +50,6 @@ bool handle_connect (struct tcpConnection *client,
 	  socks5_write_request (client, RES_HOST_UNREACHABLE);
 	  goto exit;
 	}
-      break;
     }
 
   if (destination == NULL)
@@ -69,7 +84,7 @@ bool handle_auth (struct tcpConnection * client)
 	}
       else
 	{
-	  perror ("auth not supported");
+	  logger (WARN, "auth not supported");
 	}
 
       free (auth_request);
