@@ -1,5 +1,14 @@
 1;3801;0c
 #define _GNU_SOURCE		/* required for POLLRDHUP event */
+
+#ifdef __APPLE__ 
+#define _DARWIN_C_SOURCE 
+#endif
+
+#ifndef POLLRDHUP
+#define POLLRDHUP 0x2000
+#endif
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
