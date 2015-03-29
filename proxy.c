@@ -1,4 +1,3 @@
-1;3801;0c
 #define _GNU_SOURCE		/* required for POLLRDHUP event */
 
 #ifdef __APPLE__ 
