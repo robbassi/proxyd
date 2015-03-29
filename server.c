@@ -39,15 +39,9 @@ bool handle_connect (struct tcpConnection *client,
       inet_ntop (AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
     }
 
-  switch (request->address_type)
+  if (request->address_type == ATYP_DOMAIN)
     {
-    case ATYP_IPV4:
-      break;
-    case ATYP_IPV6:
-      break;
-    case ATYP_DOMAIN:
-      logger (INFO, "%s:%d <=> %s:%s", ipstr, port, request->bind_address.domain.name,
-	      portbuf);
+      logger (INFO, "%s:%d <=> %s:%s", ipstr, port, request->bind_address.domain.name, portbuf);
       destination = tcp_connect (request->bind_address.domain.name, portbuf);
 
       // could not connect to host
@@ -56,7 +50,6 @@ bool handle_connect (struct tcpConnection *client,
 	  socks5_write_request (client, RES_HOST_UNREACHABLE);
 	  goto exit;
 	}
-      break;
     }
 
   if (destination == NULL)
@@ -91,7 +84,7 @@ bool handle_auth (struct tcpConnection * client)
 	}
       else
 	{
-	  perror ("auth not supported");
+	  logger (WARN, "auth not supported");
 	}
 
       free (auth_request);
