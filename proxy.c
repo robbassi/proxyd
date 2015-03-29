@@ -1,4 +1,4 @@
-
+1;3801;0c
 #define _GNU_SOURCE		/* required for POLLRDHUP event */
 #include <stdio.h>
 #include <stdbool.h>
@@ -9,8 +9,7 @@
 #include "tcp.h"
 #include "logger.h"
 
-/* 2.5MB/s */
-#define BUFSIZE 256
+#define BUFSIZE 20000
 #define DELAYMS 100
 
 void __pump (int sourcefd, int destfd)
