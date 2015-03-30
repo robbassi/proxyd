@@ -55,7 +55,7 @@ bool handle_connect (struct tcpConnection *client,
   if (destination == NULL)
     {
       socks5_write_request (client, RES_FAIL);
-      perror ("could not connect to destination host");
+      logger (WARN, "could not connect to destination host");
       goto exit;
     }
 
