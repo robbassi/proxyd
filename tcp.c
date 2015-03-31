@@ -14,7 +14,7 @@ struct tcpConnection *tcp_connect (char *host, char *port)
 {
   int sockfd;
   struct tcpConnection *conn = NULL;
-  struct addrinfo hints, *res;
+  struct addrinfo hints, *res, *rp;
 
   memset (&hints, 0, sizeof hints);
   hints.ai_family = AF_UNSPEC;
@@ -24,8 +24,21 @@ struct tcpConnection *tcp_connect (char *host, char *port)
 
   if (lookup_res == 0)
     {
-      sockfd = socket (res->ai_family, res->ai_socktype, res->ai_protocol);
-      connect (sockfd, res->ai_addr, res->ai_addrlen);
+      
+      for (rp = res; rp != NULL; rp = rp->ai_next) 
+	{	
+	  sockfd = socket (rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+	  if (sockfd == -1)
+	    continue;
+
+	  if (connect (sockfd, rp->ai_addr, rp->ai_addrlen) == 0)
+	    break;
+	}
+
+      if (rp == NULL)
+	{
+	  return NULL;
+	}
 
       conn = (struct tcpConnection *) malloc (sizeof (struct tcpConnection));
       conn->fd = sockfd;
@@ -39,7 +52,6 @@ struct tcpConnection *tcp_connect (char *host, char *port)
 struct tcpConnection *tcp_listen (char *host, char *port)
 {
   int sockfd, reuseaddr = true;
-  struct addrinfo hints, *res;
   struct tcpConnection *conn = NULL;
 
   /* bind to INADDR_ANY */
@@ -63,6 +75,8 @@ struct tcpConnection *tcp_listen (char *host, char *port)
   /* bind to specific host */
   else 
     {
+      struct addrinfo hints, *res, *rp;
+
       memset (&hints, 0, sizeof hints);
       hints.ai_family = AF_UNSPEC;
       hints.ai_socktype = SOCK_STREAM;
@@ -71,13 +85,22 @@ struct tcpConnection *tcp_listen (char *host, char *port)
 
       if (lookup_res == 0)
 	{
-	  sockfd = socket (res->ai_family, res->ai_socktype, res->ai_protocol);
-	  setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof reuseaddr);
-
-	  if (bind (sockfd, res->ai_addr, res->ai_addrlen) == -1)
+	  for (rp = res; rp != NULL; rp = rp->ai_next) 
 	    {
-	      goto fail1;
+	      sockfd = socket (rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+	      if (sockfd == -1)
+		continue;
+
+	      if (bind (sockfd, rp->ai_addr, rp->ai_addrlen) == 0)
+		break;
 	    }
+
+	  if (rp == NULL)
+	    {
+	      goto fail2;
+	    }
+
+	  setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof reuseaddr);
 	  freeaddrinfo (res);
 	}
       else 
