@@ -27,17 +27,16 @@ status ()
 
 cleanup ()
 {
+    # remove out file if exists
+    if [ -e $OUTFILE ]; then
+	rm $OUTFILE
+    fi
     if pgrep proxyd > /dev/null; then
 	kill $(pgrep proxyd)
     fi
 }
 
 trap cleanup EXIT
-
-# remove out file if exists
-if [ -e $OUTFILE ]; then
-    rm $OUTFILE
-fi
 
 # listen on some socket and pipe to out file
 nc -l 8080 > $OUTFILE &
