@@ -1,19 +1,16 @@
-all: libtcp server
+CC = gcc
+FLAGS = -g
+DEPS = tcp.h logger.h proxy.h socks5.h server.h
+OBJ = tcp.o logger.o proxy.o socks5.o server.o
 
-server: libtcp socks5 proxy logger
-	gcc -g -o proxyd server.c socks5.o proxy.o tcp.o logger.o
+# build deps
+%.o: %.c $(DEPS)
+	$(CC) $(FLAGS) -c -o $@ $<
 
-socks5:
-	gcc -g -c -o socks5.o socks5.c
+# link objs
+proxyd: $(OBJ)
+	$(CC) $(FLAGS) -o $@ $^
 
-proxy: 
-	gcc -g -c -o proxy.o proxy.c
-
-libtcp:
-	gcc -g -c -o tcp.o tcp.c
-
-logger:
-	gcc -g -c -o logger.o logger.c
-
+# wipeout objs and emace files
 clean:
 	rm -f *.o *~
