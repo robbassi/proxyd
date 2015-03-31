@@ -11,6 +11,6 @@ OBJ = tcp.o logger.o proxy.o socks5.o server.o
 proxyd: $(OBJ)
 	$(CC) $(FLAGS) -o $@ $^
 
-# wipeout objs and emace files
+# wipeout objs and emacs files
 clean:
 	rm -f *.o *~
