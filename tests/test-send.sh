@@ -2,12 +2,17 @@
 
 source rainbow.sh
 
-INFILE="in.txt"
+if [ $# == 0 ]; then
+    echo "Usage: test-send FILE [PORT]"
+    exit 1
+fi
+
+INFILE=$1
 OUTFILE="out.txt"
 PORT=1199
 
-if [ $# == 1 ]; then
-    PORT=$1
+if [ $# == 2 ]; then
+    PORT=$2
 fi
 
 checkjob ()
@@ -58,6 +63,7 @@ status
 # cat the in file over the local proxy
 echo -n "sending file............."
 
+sleep 1
 cat $INFILE | nc localhost $PORT -X 5 -x localhost
 
 if [ ! -e $OUTFILE ]; then
