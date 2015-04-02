@@ -62,7 +62,7 @@ if [ ! -e $OUTFILE ]; then
 fi
 
 # check the diff
-diff $INFILE $OUTFILE > /dev/null
+diff $INFILE $OUTFILE 
 
 if [ $? == 0 ]; then
     echogreen "ok"
