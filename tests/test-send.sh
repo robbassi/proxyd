@@ -2,7 +2,7 @@
 
 source rainbow.sh
 
-INFILE="/home/rob/Downloads/steam_latest.deb"
+INFILE="in.txt"
 OUTFILE="out.txt"
 PORT=$1
 
