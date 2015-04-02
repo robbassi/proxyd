@@ -4,7 +4,11 @@ source rainbow.sh
 
 INFILE="in.txt"
 OUTFILE="out.txt"
-PORT=$1
+PORT=1199
+
+if [ $# == 1 ]; then
+    PORT=$1
+fi
 
 checkjob ()
 {
@@ -40,7 +44,7 @@ cleanup ()
 trap cleanup EXIT
 
 # listen on some socket and pipe to out file
-nc -l $PORT > $OUTFILE &
+nc -d -l $PORT > $OUTFILE &
 
 echo -n "starting target server..."
 status
@@ -62,7 +66,7 @@ if [ ! -e $OUTFILE ]; then
 fi
 
 # check the diff
-diff $INFILE $OUTFILE 
+diff $INFILE $OUTFILE > /dev/null
 
 if [ $? == 0 ]; then
     echogreen "ok"
