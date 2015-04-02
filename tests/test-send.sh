@@ -2,8 +2,9 @@
 
 source rainbow.sh
 
-INFILE="in.txt"
+INFILE="/home/rob/Downloads/steam_latest.deb"
 OUTFILE="out.txt"
+PORT=$1
 
 checkjob ()
 {
@@ -29,7 +30,7 @@ cleanup ()
 {
     # remove out file if exists
     if [ -e $OUTFILE ]; then
-	rm $OUTFILE
+    	rm $OUTFILE
     fi
     if pgrep proxyd > /dev/null; then
 	kill $(pgrep proxyd)
@@ -39,7 +40,7 @@ cleanup ()
 trap cleanup EXIT
 
 # listen on some socket and pipe to out file
-nc -l 8080 > $OUTFILE &
+nc -l $PORT > $OUTFILE &
 
 echo -n "starting target server..."
 status
@@ -53,8 +54,7 @@ status
 # cat the in file over the local proxy
 echo -n "sending file............."
 
-sleep 1
-cat $INFILE | nc localhost 8080 -X 5 -x localhost
+cat $INFILE | nc localhost $PORT -X 5 -x localhost
 
 if [ ! -e $OUTFILE ]; then
     echored "fail (could not send file)"
@@ -64,7 +64,7 @@ fi
 # check the diff
 diff $INFILE $OUTFILE > /dev/null
 
-if [ $? ]; then
+if [ $? == 0 ]; then
     echogreen "ok"
     echogreen "test passed"
 else
