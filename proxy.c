@@ -20,7 +20,7 @@
 #define BUFSIZE 20000
 #define DELAYMS 100
 
-void __pump (int sourcefd, int destfd)
+int fwd (int sourcefd, int destfd)
 {				
   char buf[BUFSIZE];
   int len = read (sourcefd, buf, BUFSIZE);
@@ -31,19 +31,23 @@ void __pump (int sourcefd, int destfd)
 	{
 	  written += write (destfd, buf + written, len - written);
 	}
-      
+
+      return len;
     }
+
+  return 0;
 }
 
 bool proxy_connect (int sourcefd, int destfd)
 {				
   struct pollfd fds[2];
+  bool srcfin = false, destfin = false;
 
   fds[0].fd = sourcefd;
-  fds[0].events = POLLIN | POLLRDHUP;
+  fds[0].events = POLLIN;
 
   fds[1].fd = destfd;
-  fds[1].events = POLLIN | POLLRDHUP;
+  fds[1].events = POLLIN;
 
   while (1)
     {
@@ -58,19 +62,26 @@ bool proxy_connect (int sourcefd, int destfd)
 	}
       else if (res)
 	{
-	  if (fds[0].revents & POLLRDHUP || fds[1].revents & POLLRDHUP)
-	    {
-	      return true;
-	    }
 
 	  if (fds[0].revents & POLLIN)
 	    {
-	      __pump (sourcefd, destfd);
+	      
+	      int len = fwd (fds[0].fd, fds[1].fd);
+
+	      if (len == 0)
+		{
+		  return true;
+		}
 	    }
 
 	  if (fds[1].revents & POLLIN)
 	    {
-	      __pump (destfd, sourcefd);
+	      int len = fwd (fds[1].fd, fds[0].fd);
+
+	      if (len == 0)
+		{
+		  return true;
+		}
 	    }
 	}
       usleep(DELAYMS);
