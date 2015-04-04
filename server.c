@@ -113,11 +113,8 @@ void *handle_request (void *data)
 		  logger (WARN, "connect failed");
 		}
 	      break;
-	    case CMD_BIND:
-	      logger (WARN, "bind not supported");
-	      break;
-	    case CMD_UDP_ASSOC:
-	      logger (WARN, "udp assoc. not supported");
+	    default:
+	      logger (WARN, "command not supported");
 	      break;
 	    }
 
@@ -126,7 +123,7 @@ void *handle_request (void *data)
     }
   else
     {
-      // socks5_write_auth(client, AUTH_NOT_ACCEPTABLE);
+      socks5_write_auth (client, AUTH_NOT_ACCEPTABLE);
       logger (WARN, "auth failed");
     }
 
