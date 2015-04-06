@@ -77,12 +77,16 @@ bool handle_auth (struct tcpConnection * client)
   if (auth_request != NULL)
     {
       /* only support method 00 for now */
-      if (auth_request->methods[0] == AUTH_NONE)
+      int i;
+      for (i = 0; i < auth_request->nmethods; i++)
 	{
-	  socks5_write_auth (client, AUTH_NONE);
-	  success = true;
+	  if (auth_request->methods[i] == AUTH_NONE)
+	    {
+	      socks5_write_auth (client, AUTH_NONE);
+	      success = true;
+	    }	  
 	}
-      else
+      if (!success)
 	{
 	  logger (WARN, "auth not supported");
 	}
