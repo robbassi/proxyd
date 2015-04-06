@@ -78,7 +78,7 @@ bool handle_auth (struct tcpConnection * client)
     {
       /* only support method 00 for now */
       int i;
-      for (i = 0; i < auth_request->nmethods; i++)
+      for (i = 0; !success && i < auth_request->nmethods; i++)
 	{
 	  if (auth_request->methods[i] == AUTH_NONE)
 	    {
